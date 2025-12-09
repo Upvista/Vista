@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
 };
 
-// Conditionally use PWA only in production builds to avoid Turbopack conflicts
+// Only apply PWA config in production
+// For Vercel/deployment: Use webpack mode explicitly
 if (process.env.NODE_ENV === 'production') {
   const withPWA = require('next-pwa')({
     dest: 'public',
