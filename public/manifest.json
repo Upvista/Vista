@@ -1,0 +1,30 @@
+{
+  "name": "Vista AI - AI Companion Robot",
+  "short_name": "Vista AI",
+  "description": "Vista AI - An interactive AI companion robot with voice conversation and animated emotions. Developed by Hamza Hafeez.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#00ffff",
+  "orientation": "landscape",
+  "scope": "/",
+  "categories": ["entertainment", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": []
+}

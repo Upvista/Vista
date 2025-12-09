@@ -1,0 +1,280 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --background: #0f0f23;
+  --foreground: #00ffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+html, body {
+  font-family: 'Orbitron', monospace;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: var(--foreground);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Force landscape on mobile */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  html {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    overflow: hidden;
+  }
+  
+  body {
+    width: 100vh;
+    height: 100vw;
+  }
+}
+
+.screen-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.robot-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.robot-face {
+  position: relative;
+  width: 550px;
+  height: 350px;
+  max-width: 90vw;
+  max-height: 90vh;
+  aspect-ratio: 550 / 350;
+  border-radius: 20px;
+  background: #000000;
+  box-shadow: 
+    0 0 50px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.9);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  animation: glow 3s ease-in-out infinite alternate;
+  transition: all 0.3s ease;
+}
+
+.robot-face.listening {
+  animation: listen 1s ease-in-out infinite, glow 3s ease-in-out infinite alternate;
+}
+
+.robot-face.thinking {
+  animation: think 2s ease-in-out infinite, glow 3s ease-in-out infinite alternate;
+}
+
+.robot-face.talking {
+  animation: talk 0.3s ease-in-out infinite, glow 3s ease-in-out infinite alternate;
+}
+
+.eyes-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 55px;
+  z-index: 10;
+}
+
+.eye {
+  width: 100px;
+  height: 70px;
+  background: #00ffff;
+  border-radius: 8px;
+  box-shadow: 
+    0 0 25px rgba(0, 255, 255, 0.9),
+    0 0 50px rgba(0, 255, 255, 0.4);
+  position: relative;
+  transition: all 0.4s ease;
+}
+
+.eye.blinking {
+  animation: blink 0.3s ease-in-out;
+}
+
+.eye.happy {
+  animation: happy 0.4s ease-in-out;
+}
+
+.eye.sad {
+  animation: sad 0.4s ease-in-out;
+}
+
+.eye.surprised {
+  animation: surprised 0.6s ease-in-out;
+}
+
+.eye.excited {
+  animation: excited 0.8s ease-in-out infinite;
+}
+
+.eye.angry {
+  animation: angry 0.5s ease-in-out;
+}
+
+.eye.sleepy {
+  animation: sleepy 0.6s ease-in-out;
+}
+
+.eye.confused {
+  animation: confused 0.5s ease-in-out;
+}
+
+.eye.love {
+  animation: love 0.7s ease-in-out;
+}
+
+.eye.wink {
+  animation: wink 0.7s ease-in-out;
+}
+
+@keyframes glow {
+  0% { 
+    box-shadow: 
+      0 0 50px rgba(0, 255, 255, 0.3), 
+      inset 0 0 50px rgba(0, 0, 0, 0.8), 
+      0 0 100px rgba(0, 255, 255, 0.1); 
+  }
+  100% { 
+    box-shadow: 
+      0 0 80px rgba(0, 255, 255, 0.5), 
+      inset 0 0 50px rgba(0, 0, 0, 0.8), 
+      0 0 150px rgba(0, 255, 255, 0.2); 
+  }
+}
+
+@keyframes listen {
+  0%, 100% { 
+    transform: scale(1); 
+    box-shadow: 
+      0 0 50px rgba(0, 255, 255, 0.3), 
+      inset 0 0 50px rgba(0, 0, 0, 0.8), 
+      0 0 100px rgba(0, 255, 255, 0.1); 
+  }
+  50% { 
+    transform: scale(1.02); 
+    box-shadow: 
+      0 0 80px rgba(0, 255, 255, 0.6), 
+      inset 0 0 50px rgba(0, 0, 0, 0.8), 
+      0 0 150px rgba(0, 255, 255, 0.4); 
+  }
+}
+
+@keyframes think {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+  }
+  25% { 
+    transform: scale(1.01) rotate(-1deg); 
+  }
+  75% { 
+    transform: scale(1.01) rotate(1deg); 
+  }
+}
+
+@keyframes talk {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+}
+
+@keyframes blink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.1); }
+}
+
+@keyframes wink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.05); }
+}
+
+@keyframes surprised {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+@keyframes happy {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+@keyframes sad {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(0.8) rotate(-3deg); }
+}
+
+@keyframes excited {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.4); }
+  50% { transform: scale(1.2); }
+  75% { transform: scale(1.5); }
+}
+
+@keyframes angry {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.3) rotate(3deg); }
+  50% { transform: scale(1.2) rotate(-3deg); }
+  75% { transform: scale(1.4) rotate(2deg); }
+}
+
+@keyframes sleepy {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.3); }
+}
+
+@keyframes confused {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(8deg); }
+  50% { transform: scale(0.9) rotate(-8deg); }
+  75% { transform: scale(1.05) rotate(4deg); }
+}
+
+@keyframes love {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.15); }
+  50% { transform: scale(1.25); }
+  75% { transform: scale(1.15); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .robot-face {
+    width: 90vw;
+    max-height: 90vh;
+  }
+
+  .eye {
+    width: 80px;
+    height: 60px;
+  }
+
+  .eyes-container {
+    gap: 40px;
+  }
+}

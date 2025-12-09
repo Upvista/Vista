@@ -1,0 +1,22 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+// Conditionally use PWA only in production builds to avoid Turbopack conflicts
+if (process.env.NODE_ENV === 'production') {
+  const withPWA = require('next-pwa')({
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
+    disable: false,
+    buildExcludes: [/middleware-manifest.json$/],
+  });
+  
+  module.exports = withPWA(nextConfig);
+} else {
+  module.exports = nextConfig;
+}
+
+export default nextConfig;
