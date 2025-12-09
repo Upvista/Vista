@@ -4,13 +4,17 @@ import { useState, useEffect, useRef } from 'react';
 import RobotFace from './components/RobotFace';
 import { useVoiceInterface } from './hooks/useVoiceInterface';
 
-type Emotion = 'neutral' | 'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'angry' | 'confused' | 'love' | 'wink' | 'listening' | 'thinking' | 'talking';
+type Emotion = 'neutral' | 'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'angry' | 'confused' | 'love' | 'wink' | 'listening' | 'thinking' | 'talking' | 'smiling' | 'looking-left' | 'looking-right';
 
 export default function Home() {
   const [emotion, setEmotion] = useState<Emotion>('neutral');
   const voiceInterfaceRef = useRef<any>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleTranscript = async (text: string) => {
+    lastActivityRef.current = Date.now(); // Update activity timestamp
+    
     try {
       // Call backend API
       const response = await fetch('/api/chat', {
@@ -33,7 +37,6 @@ export default function Home() {
       if (detectedEmotion && detectedEmotion !== 'neutral') {
         setEmotion(detectedEmotion as Emotion);
         setTimeout(() => {
-          // After showing emotion, continue auto-animation
           setEmotion('neutral');
         }, 3000);
       }
@@ -41,7 +44,7 @@ export default function Home() {
       // Speak the response
       if (voiceInterfaceRef.current?.speak) {
         voiceInterfaceRef.current.speak(aiResponse, () => {
-          // After speaking, return to neutral and continue auto-animation
+          // After speaking, return to neutral
           setEmotion('neutral');
         });
       } else {
@@ -58,6 +61,7 @@ export default function Home() {
         
         utterance.onend = () => {
           setEmotion('neutral');
+          handleStatusChange('idle');
         };
         
         window.speechSynthesis.speak(utterance);
@@ -70,6 +74,8 @@ export default function Home() {
   };
 
   const handleStatusChange = (newStatus: 'idle' | 'listening' | 'processing' | 'speaking') => {
+    lastActivityRef.current = Date.now(); // Update activity timestamp
+    
     // Map status to emotion
     switch (newStatus) {
       case 'listening':
@@ -92,10 +98,47 @@ export default function Home() {
   useEffect(() => {
     voiceInterfaceRef.current = {
       startListening: voiceInterface.startListening,
+      startContinuousListening: voiceInterface.startContinuousListening,
       stopListening: voiceInterface.stopListening,
       speak: voiceInterface.speak,
     };
   }, [voiceInterface]);
+
+  // Start continuous listening for "hey vista" hotword on mount
+  useEffect(() => {
+    if (voiceInterface.isSupported && !voiceInterface.isListening) {
+      // Start continuous listening for hotword detection
+      const timer = setTimeout(() => {
+        if (!voiceInterface.isListening) {
+          voiceInterface.startContinuousListening();
+        }
+      }, 1500); // Delay to ensure everything is ready
+      
+      return () => clearTimeout(timer);
+    }
+  }, [voiceInterface.isSupported]);
+
+  // Idle detection - show sleepy after 30 seconds of inactivity
+  useEffect(() => {
+    const checkIdle = () => {
+      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+      const idleThreshold = 30000; // 30 seconds
+
+      if (timeSinceLastActivity > idleThreshold && emotion === 'neutral') {
+        setEmotion('sleepy');
+      } else if (timeSinceLastActivity <= idleThreshold && emotion === 'sleepy') {
+        setEmotion('neutral');
+      }
+    };
+
+    idleTimerRef.current = setInterval(checkIdle, 5000); // Check every 5 seconds
+
+    return () => {
+      if (idleTimerRef.current) {
+        clearInterval(idleTimerRef.current);
+      }
+    };
+  }, [emotion]);
 
   // Handle face click - show joy and start listening
   const handleFaceClick = () => {
@@ -103,7 +146,9 @@ export default function Home() {
       return;
     }
 
-    // Show joy emotion
+    lastActivityRef.current = Date.now(); // Reset idle timer
+    
+    // Show happy emotion
     setEmotion('happy');
     
     // Start listening after a short delay

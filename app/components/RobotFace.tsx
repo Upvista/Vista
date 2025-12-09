@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface RobotFaceProps {
-  emotion: 'neutral' | 'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'angry' | 'confused' | 'love' | 'wink' | 'listening' | 'thinking' | 'talking';
+  emotion: 'neutral' | 'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'angry' | 'confused' | 'love' | 'wink' | 'listening' | 'thinking' | 'talking' | 'smiling' | 'looking-left' | 'looking-right';
   isActive?: boolean;
   onFaceClick?: () => void;
   autoAnimate?: boolean;
 }
 
-const AUTO_EMOTIONS: Array<'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'confused' | 'love' | 'wink'> = [
-  'happy', 'sad', 'surprised', 'excited', 'sleepy', 'confused', 'love', 'wink'
+const AUTO_EMOTIONS: Array<'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' | 'confused' | 'love' | 'wink' | 'smiling'> = [
+  'happy', 'sad', 'surprised', 'excited', 'sleepy', 'confused', 'love', 'wink', 'smiling'
 ];
 
 export default function RobotFace({ emotion, isActive = false, onFaceClick, autoAnimate = false }: RobotFaceProps) {
@@ -20,8 +20,28 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
   const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
   const [isBlinking, setIsBlinking] = useState(false);
   const [currentAutoEmotion, setCurrentAutoEmotion] = useState<string | null>(null);
+  const [lookDirection, setLookDirection] = useState<'center' | 'left' | 'right'>('center');
 
-  // Eye tracking
+  // Eye tracking and random looking around
+  useEffect(() => {
+    if (!containerRef.current || emotion !== 'neutral' || !isActive || !autoAnimate) return;
+    
+    // Random eye movement (looking around)
+    const lookInterval = setInterval(() => {
+      const directions: Array<'left' | 'right' | 'center'> = ['left', 'right', 'center'];
+      const randomDir = directions[Math.floor(Math.random() * directions.length)];
+      setLookDirection(randomDir);
+      
+      // Return to center after a moment
+      setTimeout(() => {
+        setLookDirection('center');
+      }, 1500 + Math.random() * 1000);
+    }, 3000 + Math.random() * 3000); // Look around every 3-6 seconds
+
+    return () => clearInterval(lookInterval);
+  }, [emotion, isActive, autoAnimate]);
+
+  // Mouse/touch tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current || emotion !== 'neutral' || !isActive) return;
@@ -40,13 +60,42 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
       });
     };
 
-    if (emotion === 'neutral' && isActive) {
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!containerRef.current || emotion !== 'neutral' || !isActive || e.touches.length === 0) return;
+      
+      const touch = e.touches[0];
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const deltaX = (touch.clientX - centerX) * 0.15;
+      const deltaY = (touch.clientY - centerY) * 0.15;
+      
+      const maxMove = 8;
+      setEyePosition({
+        x: Math.max(-maxMove, Math.min(maxMove, deltaX)),
+        y: Math.max(-maxMove, Math.min(maxMove, deltaY)),
+      });
+    };
+
+    if (emotion === 'neutral' && isActive && lookDirection === 'center') {
       window.addEventListener('mousemove', handleMouseMove);
-      return () => window.removeEventListener('mousemove', handleMouseMove);
+      window.addEventListener('touchmove', handleTouchMove);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('touchmove', handleTouchMove);
+      };
     } else {
-      setEyePosition({ x: 0, y: 0 });
+      // When looking left/right, override mouse tracking
+      if (lookDirection === 'left') {
+        setEyePosition({ x: -10, y: 0 });
+      } else if (lookDirection === 'right') {
+        setEyePosition({ x: 10, y: 0 });
+      } else {
+        setEyePosition({ x: 0, y: 0 });
+      }
     }
-  }, [emotion, isActive]);
+  }, [emotion, isActive, lookDirection]);
 
   // Auto blinking
   useEffect(() => {
@@ -128,6 +177,8 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
         return 'love';
       case 'wink':
         return 'wink';
+      case 'smiling':
+        return 'smiling';
       default:
         return '';
     }
@@ -136,6 +187,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
   const getEyeColor = () => {
     if (emotion === 'angry' || currentAutoEmotion === 'angry') return '#ff0000';
     if (emotion === 'love' || currentAutoEmotion === 'love') return '#ff0080';
+    if (emotion === 'sleepy' || currentAutoEmotion === 'sleepy') return '#88ccff';
     return '#00ffff';
   };
 
@@ -144,6 +196,21 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
     if (currentAutoEmotion) return true;
     if (emotion === 'listening' || emotion === 'thinking' || emotion === 'talking') return false;
     return emotion !== 'neutral';
+  };
+
+  // Calculate eye transform based on look direction or mouse position
+  const getEyeTransform = () => {
+    if (emotion !== 'neutral' || !isActive) return undefined;
+    
+    if (lookDirection === 'left') {
+      return 'translate(-10px, 0px)';
+    } else if (lookDirection === 'right') {
+      return 'translate(10px, 0px)';
+    } else if (lookDirection === 'center') {
+      return `translate(${eyePosition.x}px, ${eyePosition.y}px)`;
+    }
+    
+    return `translate(${eyePosition.x}px, ${eyePosition.y}px)`;
   };
 
   return (
@@ -160,7 +227,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
             ref={leftEyeRef}
             style={{
               background: getEyeColor(),
-              transform: emotion === 'neutral' && !currentAutoEmotion ? `translate(${eyePosition.x}px, ${eyePosition.y}px)` : undefined,
+              transform: getEyeTransform(),
             }}
           />
           <div 
@@ -168,7 +235,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
             ref={rightEyeRef}
             style={{
               background: getEyeColor(),
-              transform: emotion === 'neutral' && !currentAutoEmotion ? `translate(${eyePosition.x}px, ${eyePosition.y}px)` : undefined,
+              transform: getEyeTransform(),
             }}
           />
         </div>
