@@ -2,8 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
 :root {
-  --background: #0f0f23;
-  --foreground: #00ffff;
+  --background: #f5f5f5;
+  --foreground: #333333;
 }
 
 @theme inline {
@@ -13,7 +13,7 @@
 
 html, body {
   font-family: 'Orbitron', monospace;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 50%, #f0f0f0 100%);
   color: var(--foreground);
   overflow: hidden;
   margin: 0;
@@ -101,23 +101,74 @@ html, body {
   max-width: 90vw;
   max-height: 90vh;
   aspect-ratio: 550 / 350;
-  border-radius: 20px;
-  background: #000000;
+  border-radius: 28px;
+  background: linear-gradient(135deg, 
+    #fef7ff 0%, 
+    #fce7f3 20%, 
+    #f3e5f5 40%, 
+    #e8d5e9 60%, 
+    #f3e5f5 80%, 
+    #fce7f3 100%);
   box-shadow: 
-    0 0 50px rgba(0, 255, 255, 0.3),
-    inset 0 0 20px rgba(0, 0, 0, 0.9);
-  border: 2px solid rgba(0, 255, 255, 0.5);
-  animation: glow 3s ease-in-out infinite alternate;
+    0 8px 32px rgba(186, 104, 200, 0.12),
+    0 2px 8px rgba(186, 104, 200, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(186, 104, 200, 0.03);
+  border: 1px solid rgba(200, 150, 220, 0.08);
+  animation: glow-light 3s ease-in-out infinite alternate;
   transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.robot-face::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 15% 25%, rgba(236, 64, 122, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 85% 75%, rgba(186, 104, 200, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(233, 30, 99, 0.05) 0%, transparent 70%),
+    radial-gradient(circle at 30% 70%, rgba(200, 150, 220, 0.06) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(40px);
+}
+
+.robot-face::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at top left, rgba(255, 182, 193, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(221, 160, 221, 0.12) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+}
+
+.robot-face.anime-style {
+  background: linear-gradient(135deg, 
+    #fef7ff 0%, 
+    #fce7f3 20%, 
+    #f3e5f5 40%, 
+    #e8d5e9 60%, 
+    #f3e5f5 80%, 
+    #fce7f3 100%);
 }
 
 .robot-face.listening {
   box-shadow: 
-    0 0 50px rgba(138, 43, 226, 0.5),
-    inset 0 0 20px rgba(0, 0, 0, 0.9),
-    0 0 100px rgba(138, 43, 226, 0.3);
-  animation: none; /* No pulsing animation - static purplish glow */
-  border-color: rgba(138, 43, 226, 0.6);
+    0 0 50px rgba(138, 43, 226, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.9),
+    0 0 100px rgba(138, 43, 226, 0.2);
+  animation: none;
+  border-color: rgba(138, 43, 226, 0.4);
 }
 
 .robot-face.thinking {
@@ -130,99 +181,175 @@ html, body {
 
 .eyes-container {
   position: absolute;
-  top: 50%;
+  top: 38%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
-  gap: 55px;
+  gap: 120px;
   z-index: 10;
+  align-items: center;
+  justify-content: center;
 }
 
-.eye {
-  width: 100px;
-  height: 70px;
-  background: #00ffff;
-  border-radius: 8px;
-  box-shadow: 
-    0 0 25px rgba(0, 255, 255, 0.9),
-    0 0 50px rgba(0, 255, 255, 0.4);
+.eyes-container,
+.anime-mouth {
+  position: relative;
+  z-index: 1;
+}
+
+/* Simple minimalist eyes - Perfect circular dark eyes with white reflections */
+.anime-eye {
+  width: 120px;
+  height: 120px;
   position: relative;
   transition: all 0.4s ease;
+  overflow: visible;
 }
 
-.eye.blinking {
-  animation: blink 0.3s ease-in-out;
+/* Simple eye container */
+.simple-eye {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-.eye.happy {
-  animation: happy 0.4s ease-in-out;
+/* Main eye - solid dark brown/almost black circle */
+.simple-eye .eye-main {
+  width: 100%;
+  height: 100%;
+  background: #2C2623 !important;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.eye.sad {
-  animation: sad 0.4s ease-in-out;
+/* Primary reflection - larger white circle in upper-right quadrant */
+.simple-eye .eye-reflection-primary {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  top: 18%;
+  right: 18%;
+  z-index: 2;
+  pointer-events: none;
 }
 
-.eye.surprised {
-  animation: surprised 0.6s ease-in-out;
+/* Secondary reflection - smaller white circle in bottom-left quadrant */
+.simple-eye .eye-reflection-secondary {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  bottom: 22%;
+  left: 18%;
+  z-index: 2;
+  pointer-events: none;
 }
 
-.eye.excited {
-  animation: excited 0.8s ease-in-out infinite;
+/* Soft pink blush - oval, blurred, translucent */
+.simple-eye .eye-blush {
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 30px;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 105, 180, 0.6) 0%, 
+    rgba(255, 0, 127, 0.4) 40%, 
+    transparent 100%);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(6px);
 }
 
-.eye.angry {
-  animation: angry 0.5s ease-in-out;
+/* Eye blinking animation */
+.anime-eye.blinking .simple-eye .eye-main {
+  animation: simple-blink 0.3s ease-in-out;
 }
 
-.eye.sleepy {
-  animation: sleepy 0.6s ease-in-out;
+@keyframes simple-blink {
+  0%, 100% { 
+    transform: scaleY(1); 
+  }
+  50% { 
+    transform: scaleY(0.05); 
+  }
 }
 
-.eye.confused {
-  animation: confused 0.5s ease-in-out;
+/* Anime mouth - Simple 'w'-shaped curved line */
+.anime-mouth {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 25px;
+  color: #000000;
+  z-index: 5;
+  transition: all 0.3s ease;
 }
 
-.eye.love {
-  animation: love 0.7s ease-in-out;
+.anime-mouth .mouth-svg {
+  width: 100%;
+  height: 100%;
 }
 
-.eye.wink {
-  animation: wink 0.7s ease-in-out;
+.anime-mouth.happy {
+  color: #000000;
 }
 
-.eye.smiling {
-  animation: smiling 0.6s ease-in-out;
+.anime-mouth.sad {
+  color: #000000;
 }
 
-@keyframes glow {
+.anime-mouth.surprised {
+  color: #000000;
+  animation: mouth-surprised 0.6s ease-in-out;
+}
+
+.anime-mouth.angry {
+  color: #000000;
+}
+
+.anime-mouth.love {
+  color: #000000;
+  animation: mouth-love 0.7s ease-in-out;
+}
+
+.anime-mouth.talking {
+  animation: mouth-talk 0.15s ease-in-out infinite;
+}
+
+.anime-mouth.talking .talking-mouth-1 {
+  animation: talking-mouth-1 0.2s ease-in-out infinite;
+}
+
+.anime-mouth.talking .talking-mouth-2 {
+  animation: talking-mouth-2 0.15s ease-in-out infinite;
+}
+
+@keyframes glow-light {
   0% { 
     box-shadow: 
-      0 0 50px rgba(0, 255, 255, 0.3), 
-      inset 0 0 50px rgba(0, 0, 0, 0.8), 
-      0 0 100px rgba(0, 255, 255, 0.1); 
+      0 8px 32px rgba(186, 104, 200, 0.15),
+      0 2px 8px rgba(156, 39, 176, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(156, 39, 176, 0.05);
   }
   100% { 
     box-shadow: 
-      0 0 80px rgba(0, 255, 255, 0.5), 
-      inset 0 0 50px rgba(0, 0, 0, 0.8), 
-      0 0 150px rgba(0, 255, 255, 0.2); 
-  }
-}
-
-@keyframes listen {
-  0%, 100% { 
-    transform: scale(1); 
-    box-shadow: 
-      0 0 50px rgba(0, 255, 255, 0.3), 
-      inset 0 0 50px rgba(0, 0, 0, 0.8), 
-      0 0 100px rgba(0, 255, 255, 0.1); 
-  }
-  50% { 
-    transform: scale(1.02); 
-    box-shadow: 
-      0 0 80px rgba(0, 255, 255, 0.6), 
-      inset 0 0 50px rgba(0, 0, 0, 0.8), 
-      0 0 150px rgba(0, 255, 255, 0.4); 
+      0 12px 40px rgba(186, 104, 200, 0.2),
+      0 4px 12px rgba(156, 39, 176, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -1px 0 rgba(156, 39, 176, 0.08);
   }
 }
 
@@ -247,79 +374,50 @@ html, body {
   }
 }
 
-@keyframes blink {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.1); }
+@keyframes mouth-talk {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.1); }
 }
 
-@keyframes wink {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.05); }
-}
-
-@keyframes surprised {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.4); }
-}
-
-@keyframes happy {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-}
-
-@keyframes sad {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(0.8) rotate(-3deg); }
-}
-
-@keyframes excited {
-  0%, 100% { transform: scale(1); }
-  25% { transform: scale(1.4); }
-  50% { transform: scale(1.2); }
-  75% { transform: scale(1.5); }
-}
-
-@keyframes angry {
-  0%, 100% { transform: scale(1); }
-  25% { transform: scale(1.3) rotate(3deg); }
-  50% { transform: scale(1.2) rotate(-3deg); }
-  75% { transform: scale(1.4) rotate(2deg); }
-}
-
-@keyframes sleepy {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.3); }
-}
-
-@keyframes confused {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  25% { transform: scale(1.1) rotate(8deg); }
-  50% { transform: scale(0.9) rotate(-8deg); }
-  75% { transform: scale(1.05) rotate(4deg); }
-}
-
-@keyframes love {
-  0%, 100% { transform: scale(1); }
-  25% { transform: scale(1.15); }
-  50% { transform: scale(1.25); }
-  75% { transform: scale(1.15); }
-}
-
-@keyframes smiling {
+@keyframes talking-mouth-1 {
   0%, 100% { 
-    transform: scaleY(1) scaleX(1); 
-    border-radius: 8px;
+    rx: 7;
+    ry: 9;
+    opacity: 0.25;
   }
   50% { 
-    transform: scaleY(0.7) scaleX(1.2); 
-    border-radius: 50% 50% 8px 8px;
+    rx: 8;
+    ry: 11;
+    opacity: 0.3;
   }
+}
+
+@keyframes talking-mouth-2 {
+  0%, 100% { 
+    rx: 4;
+    ry: 6;
+    opacity: 0.4;
+  }
+  50% { 
+    rx: 5;
+    ry: 7;
+    opacity: 0.5;
+  }
+}
+
+@keyframes mouth-surprised {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.2); }
+}
+
+@keyframes mouth-love {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.15); }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   html, body {
-    /* Ensure full screen on mobile */
     position: fixed;
     width: 100vw;
     height: 100vh;
@@ -341,13 +439,29 @@ html, body {
     max-height: 90vh;
   }
 
-  .eye {
-    width: 80px;
-    height: 60px;
+  .anime-eye {
+    width: 100px;
+    height: 100px;
+  }
+
+  .simple-eye .eye-reflection-primary {
+    width: 30px;
+    height: 30px;
+  }
+
+  .simple-eye .eye-reflection-secondary {
+    width: 10px;
+    height: 10px;
+  }
+
+  .anime-mouth {
+    bottom: 80px;
+    width: 40px;
+    height: 20px;
   }
 
   .eyes-container {
-    gap: 40px;
+    gap: 100px;
   }
 }
 

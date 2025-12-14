@@ -223,10 +223,8 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
   };
 
   const getEyeColor = () => {
-    if (emotion === 'angry' || currentAutoEmotion === 'angry') return '#ff0000';
-    if (emotion === 'love' || currentAutoEmotion === 'love') return '#ff0080';
-    if (emotion === 'sleepy' || currentAutoEmotion === 'sleepy') return '#88ccff';
-    return '#00ffff';
+    // Very dark brown/almost black - solid, opaque
+    return '#2C2623';
   };
 
   const shouldShowEyeAnimation = () => {
@@ -267,31 +265,126 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
     return `translate(${eyePosition.x}px, ${eyePosition.y}px)`;
   };
 
+  // Get pupil position for anime eyes - reflections move slightly for eye tracking
+  const getPupilTransform = () => {
+    if (!isActive) return undefined;
+    
+    // Don't apply transform during emotion animations (except listening/thinking/talking)
+    if (currentAutoEmotion && 
+        emotion !== 'listening' && 
+        emotion !== 'thinking' && 
+        emotion !== 'talking') {
+      return undefined;
+    }
+    
+    // Allow eye movement during neutral, listening, thinking, talking
+    const allowMovement = emotion === 'neutral' || 
+                         emotion === 'listening' || 
+                         emotion === 'thinking' || 
+                         emotion === 'talking';
+    
+    if (!allowMovement) return undefined;
+    
+    // Reflections move slightly for natural eye tracking effect
+    const reflectionMoveX = eyePosition.x * 0.3;
+    const reflectionMoveY = eyePosition.y * 0.3;
+    const maxReflectionMove = 6;
+    
+    if (lookDirection === 'left') {
+      return 'translate(-4px, 0px)';
+    } else if (lookDirection === 'right') {
+      return 'translate(4px, 0px)';
+    } else if (lookDirection === 'center') {
+      return `translate(${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveX))}px, ${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveY))}px)`;
+    }
+    
+    return `translate(${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveX))}px, ${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveY))}px)`;
+  };
+
+  // Get mouth shape based on emotion
+  const getMouthShape = () => {
+    if (emotion === 'talking') return 'talking';
+    if (currentAutoEmotion === 'happy' || emotion === 'happy' || currentAutoEmotion === 'excited' || emotion === 'excited' || currentAutoEmotion === 'smiling' || emotion === 'smiling') return 'happy';
+    if (currentAutoEmotion === 'sad' || emotion === 'sad') return 'sad';
+    if (currentAutoEmotion === 'surprised' || emotion === 'surprised') return 'surprised';
+    if (currentAutoEmotion === 'angry' || emotion === 'angry') return 'angry';
+    if (currentAutoEmotion === 'love' || emotion === 'love') return 'love';
+    if (currentAutoEmotion === 'confused' || emotion === 'confused') return 'confused';
+    if (currentAutoEmotion === 'sleepy' || emotion === 'sleepy') return 'sleepy';
+    return 'neutral';
+  };
+
   return (
     <div className="robot-container">
       <div 
-        className={`robot-face ${getEmotionClass()} ${emotion === 'listening' ? 'listening' : ''} ${emotion === 'thinking' ? 'thinking' : ''} ${emotion === 'talking' ? 'talking' : ''}`}
+        className={`robot-face anime-style ${getEmotionClass()} ${emotion === 'listening' ? 'listening' : ''} ${emotion === 'thinking' ? 'thinking' : ''} ${emotion === 'talking' ? 'talking' : ''}`}
         ref={containerRef}
         onClick={onFaceClick}
         style={{ cursor: onFaceClick ? 'pointer' : 'default' }}
       >
         <div className="eyes-container">
           <div 
-            className={`eye ${emotion === 'wink' || currentAutoEmotion === 'wink' ? 'wink' : ''} ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
+            className={`anime-eye ${emotion === 'wink' || currentAutoEmotion === 'wink' ? 'wink' : ''} ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
             ref={leftEyeRef}
             style={{
-              background: getEyeColor(),
               transform: getEyeTransform(),
             }}
-          />
+          >
+            <div className="simple-eye">
+              <div className="eye-main"></div>
+              <div className="eye-reflection-primary"></div>
+              <div className="eye-reflection-secondary"></div>
+              <div className="eye-blush"></div>
+            </div>
+          </div>
           <div 
-            className={`eye ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
+            className={`anime-eye ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
             ref={rightEyeRef}
             style={{
-              background: getEyeColor(),
               transform: getEyeTransform(),
             }}
-          />
+          >
+            <div className="simple-eye">
+              <div className="eye-main"></div>
+              <div className="eye-reflection-primary"></div>
+              <div className="eye-reflection-secondary"></div>
+              <div className="eye-blush"></div>
+            </div>
+          </div>
+        </div>
+        <div className={`anime-mouth ${getMouthShape()}`}>
+          <svg viewBox="0 0 100 60" className="mouth-svg">
+            {getMouthShape() === 'happy' && (
+              <path d="M 25 30 Q 35 38, 45 30 Q 55 38, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'sad' && (
+              <path d="M 25 35 Q 35 27, 45 35 Q 55 27, 65 35" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'surprised' && (
+              <ellipse cx="45" cy="30" rx="6" ry="10" stroke="currentColor" strokeWidth="3" fill="currentColor" opacity="0.2"/>
+            )}
+            {getMouthShape() === 'angry' && (
+              <path d="M 25 33 Q 35 28, 45 33 Q 55 28, 65 33" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'love' && (
+              <path d="M 25 30 Q 35 25, 45 30 Q 55 25, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'confused' && (
+              <path d="M 30 30 Q 40 33, 50 30 Q 60 33, 70 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'sleepy' && (
+              <path d="M 28 33 Q 40 35, 52 33 Q 60 35, 68 33" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+            )}
+            {getMouthShape() === 'talking' && (
+              <>
+                <ellipse cx="45" cy="30" rx="7" ry="9" stroke="currentColor" strokeWidth="3" fill="currentColor" opacity="0.25" className="talking-mouth-1"/>
+                <ellipse cx="45" cy="30" rx="4" ry="6" stroke="currentColor" strokeWidth="2.5" fill="currentColor" opacity="0.4" className="talking-mouth-2"/>
+              </>
+            )}
+            {getMouthShape() === 'neutral' && (
+              <path d="M 25 30 Q 35 33, 45 30 Q 55 33, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            )}
+          </svg>
         </div>
       </div>
     </div>

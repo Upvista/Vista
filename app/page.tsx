@@ -51,9 +51,9 @@ export default function Home() {
         // Fallback: use browser's speech synthesis directly
         const utterance = new SpeechSynthesisUtterance(aiResponse);
         utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
+        utterance.rate = 0.9;      // Slower for cute, gentle delivery
+        utterance.pitch = 1.15;    // Higher pitch for cute, sweet sound
+        utterance.volume = 0.85;    // Soft, gentle volume
         
         utterance.onstart = () => {
           setEmotion('talking');

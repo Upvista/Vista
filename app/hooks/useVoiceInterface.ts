@@ -145,14 +145,16 @@ export function useVoiceInterface(
       const voices = window.speechSynthesis.getVoices();
       console.log('[Voice] Available voices:', voices.length);
       
-      // Preferred female voices (in order of preference)
+      // Preferred cute female voices (in order of preference) - looking for cute, young, sweet voices
       const preferredNames = [
-        'Samantha',           // macOS - very natural
-        'Karen',              // macOS - clear and pleasant
-        'Victoria',           // macOS - warm
-        'Google US English Female',  // Chrome - good quality
-        'Microsoft Zira - English (United States)',  // Windows Edge
-        'Microsoft Zira',    // Windows
+        'Samantha',           // macOS - sweet, friendly, cute
+        'Allison',            // macOS - young, cheerful, cute
+        'Victoria',           // macOS - gentle, warm, cute
+        'Google US English Female',  // Chrome - cute, pleasant
+        'Microsoft Aria',     // Windows - natural, cute
+        'Microsoft Zira - English (United States)',  // Windows Edge - friendly
+        'Microsoft Zira',     // Windows - clear, cute
+        'Karen',              // macOS - soft, gentle
         'en-US-Female',       // Generic
         'en_US-female',       // Generic
       ];
@@ -170,16 +172,17 @@ export function useVoiceInterface(
         }
       }
       
-      // Fallback: find any female en-US voice
+      // Fallback: find any cute female en-US voice
       const femaleVoice = voices.find(v => {
         const isEnUS = v.lang.startsWith('en-US');
         const isFemale = v.name.toLowerCase().includes('female') || 
                         v.name.toLowerCase().includes('samantha') ||
-                        v.name.toLowerCase().includes('karen') ||
+                        v.name.toLowerCase().includes('allison') ||
+                        v.name.toLowerCase().includes('aria') ||
                         v.name.toLowerCase().includes('victoria') ||
+                        v.name.toLowerCase().includes('karen') ||
                         v.name.toLowerCase().includes('zira') ||
-                        v.name.toLowerCase().includes('susan') ||
-                        v.name.toLowerCase().includes('linda');
+                        v.name.toLowerCase().includes('susan');
         return isEnUS && isFemale;
       });
       
@@ -312,11 +315,15 @@ export function useVoiceInterface(
     } else {
       // Fallback: try to select voice again
       const voices = window.speechSynthesis.getVoices();
+      // Look for cute female voices
       const femaleVoice = voices.find(v => 
         v.lang.startsWith('en-US') && 
         (v.name.toLowerCase().includes('female') || 
          v.name.toLowerCase().includes('samantha') ||
-         v.name.toLowerCase().includes('karen'))
+         v.name.toLowerCase().includes('allison') ||
+         v.name.toLowerCase().includes('aria') ||
+         v.name.toLowerCase().includes('karen') ||
+         v.name.toLowerCase().includes('victoria'))
       );
       if (femaleVoice) {
         utterance.voice = femaleVoice;
@@ -325,10 +332,10 @@ export function useVoiceInterface(
       utterance.lang = 'en-US';
     }
     
-    // Optimized settings for natural, beautiful female voice
-    utterance.rate = 0.95;      // Slightly slower for clarity
-    utterance.pitch = 1.1;      // Slightly higher pitch (more feminine)
-    utterance.volume = 0.9;     // Clear volume
+    // Optimized settings for cute, beautiful, sweet voice
+    utterance.rate = 0.9;       // Slower for gentle, cute delivery
+    utterance.pitch = 1.15;     // Higher pitch for cute, sweet sound
+    utterance.volume = 0.85;    // Soft, gentle volume
 
     utterance.onstart = () => {
       onStatusChange('speaking');
