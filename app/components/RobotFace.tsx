@@ -148,7 +148,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, auto
     const blinkInterval = setInterval(() => {
       setIsBlinking(true);
       setTimeout(() => setIsBlinking(false), 200);
-    }, 3000 + Math.random() * 2000);
+    }, 2000);
 
     return () => clearInterval(blinkInterval);
   }, [emotion, isActive, autoAnimate, currentAutoEmotion]);

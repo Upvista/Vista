@@ -103,18 +103,17 @@ html, body {
   aspect-ratio: 550 / 350;
   border-radius: 28px;
   background: linear-gradient(135deg, 
-    #fef7ff 0%, 
-    #fce7f3 20%, 
-    #f3e5f5 40%, 
-    #e8d5e9 60%, 
-    #f3e5f5 80%, 
-    #fce7f3 100%);
+    #fff0f8 0%, 
+    #ffeef7 25%, 
+    #fce7f3 50%, 
+    #f8e8ff 75%, 
+    #fff0f8 100%);
   box-shadow: 
-    0 8px 32px rgba(186, 104, 200, 0.12),
-    0 2px 8px rgba(186, 104, 200, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(186, 104, 200, 0.03);
-  border: 1px solid rgba(200, 150, 220, 0.08);
+    0 8px 32px rgba(255, 182, 193, 0.15),
+    0 2px 8px rgba(221, 160, 221, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(255, 182, 193, 0.05);
+  border: 1px solid rgba(255, 192, 203, 0.1);
   animation: glow-light 3s ease-in-out infinite alternate;
   transition: all 0.3s ease;
   overflow: hidden;
@@ -128,13 +127,12 @@ html, body {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 15% 25%, rgba(236, 64, 122, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at 85% 75%, rgba(186, 104, 200, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(233, 30, 99, 0.05) 0%, transparent 70%),
-    radial-gradient(circle at 30% 70%, rgba(200, 150, 220, 0.06) 0%, transparent 55%);
+    radial-gradient(circle at 20% 30%, rgba(255, 192, 203, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(221, 160, 221, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.2) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(40px);
+  filter: blur(50px);
 }
 
 .robot-face::after {
@@ -145,21 +143,20 @@ html, body {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(ellipse at top left, rgba(255, 182, 193, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(221, 160, 221, 0.12) 0%, transparent 50%);
+    radial-gradient(ellipse at top left, rgba(255, 182, 193, 0.4) 0%, transparent 45%),
+    radial-gradient(ellipse at bottom right, rgba(221, 160, 221, 0.35) 0%, transparent 45%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(60px);
+  filter: blur(70px);
 }
 
 .robot-face.anime-style {
   background: linear-gradient(135deg, 
-    #fef7ff 0%, 
-    #fce7f3 20%, 
-    #f3e5f5 40%, 
-    #e8d5e9 60%, 
-    #f3e5f5 80%, 
-    #fce7f3 100%);
+    #fff0f8 0%, 
+    #ffeef7 25%, 
+    #fce7f3 50%, 
+    #f8e8ff 75%, 
+    #fff0f8 100%);
 }
 
 .robot-face.listening {
@@ -278,10 +275,10 @@ html, body {
 @keyframes simple-blink {
   0%, 100% { 
     transform: scaleY(1); 
-  }
+}
   50% { 
     transform: scaleY(0.05); 
-  }
+}
 }
 
 /* Anime mouth - Simple 'w'-shaped curved line */
@@ -339,17 +336,17 @@ html, body {
 @keyframes glow-light {
   0% { 
     box-shadow: 
-      0 8px 32px rgba(186, 104, 200, 0.15),
-      0 2px 8px rgba(156, 39, 176, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(156, 39, 176, 0.05);
+      0 8px 32px rgba(255, 182, 193, 0.15),
+      0 2px 8px rgba(221, 160, 221, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(255, 182, 193, 0.05);
   }
   100% { 
     box-shadow: 
-      0 12px 40px rgba(186, 104, 200, 0.2),
-      0 4px 12px rgba(156, 39, 176, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      inset 0 -1px 0 rgba(156, 39, 176, 0.08);
+      0 12px 40px rgba(255, 182, 193, 0.2),
+      0 4px 12px rgba(221, 160, 221, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 182, 193, 0.08);
   }
 }
 
