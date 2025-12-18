@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 
 export function useVoiceInterface(
   onTranscript: (text: string) => void,
-  onStatusChange: (status: 'idle' | 'listening' | 'processing' | 'speaking') => void
+  onStatusChange: (status: 'idle' | 'listening' | 'processing' | 'speaking') => void,
+  selectedVoiceName?: string
 ) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
@@ -140,23 +141,45 @@ export function useVoiceInterface(
     // Text-to-Speech
     synthesisRef.current = window.speechSynthesis;
 
-    // Function to find and select a beautiful female American voice
-    const selectFemaleVoice = () => {
+    // Function to find and select a voice
+    const selectVoice = () => {
       const voices = window.speechSynthesis.getVoices();
       console.log('[Voice] Available voices:', voices.length);
       
-      // Preferred cute female voices (in order of preference) - looking for cute, young, sweet voices
+      // If a specific voice name is provided, use it
+      if (selectedVoiceName) {
+        const voice = voices.find(v => v.name === selectedVoiceName);
+        if (voice && voice.lang.startsWith('en-US')) {
+          selectedVoiceRef.current = voice;
+          console.log('[Voice] Selected user-chosen voice:', voice.name, voice.lang);
+          return;
+        }
+      }
+      
+      // Preferred high-quality natural voices (both male and female) - natural, clear, amazing
       const preferredNames = [
-        'Samantha',           // macOS - sweet, friendly, cute
-        'Allison',            // macOS - young, cheerful, cute
-        'Victoria',           // macOS - gentle, warm, cute
-        'Google US English Female',  // Chrome - cute, pleasant
-        'Microsoft Aria',     // Windows - natural, cute
-        'Microsoft Zira - English (United States)',  // Windows Edge - friendly
-        'Microsoft Zira',     // Windows - clear, cute
-        'Karen',              // macOS - soft, gentle
-        'en-US-Female',       // Generic
-        'en_US-female',       // Generic
+        // macOS - Premium natural voices
+        'Samantha',           // Female - sweet, natural, clear, amazing
+        'Allison',            // Female - young, cheerful, natural, clear
+        'Victoria',           // Female - gentle, warm, natural, clear
+        'Alex',              // Male - natural, clear, professional, amazing
+        'Karen',             // Female - soft, natural, clear
+        'Daniel',            // Male - British accent, natural, clear
+        'Tom',               // Male - natural, clear
+        'Fiona',             // Female - Scottish accent, natural
+        'Moira',             // Female - Irish accent, natural
+        'Tessa',             // Female - South African accent, natural
+        'Veena',             // Female - Indian accent, natural
+        // Chrome - Natural voices
+        'Google US English Female',  // Female - natural, pleasant, clear
+        'Google US English Male',    // Male - natural, clear, professional
+        // Windows - Natural voices
+        'Microsoft Aria',   // Female - natural, clear, amazing
+        'Microsoft Zira',  // Female - clear, natural
+        'Microsoft David',  // Male - natural, clear, amazing
+        'Microsoft Mark',   // Male - natural, clear
+        'Microsoft Jenny', // Female - natural, clear
+        'Microsoft Guy',    // Male - natural, clear
       ];
       
       // First, try to find a preferred voice by name
@@ -172,23 +195,30 @@ export function useVoiceInterface(
         }
       }
       
-      // Fallback: find any cute female en-US voice
-      const femaleVoice = voices.find(v => {
+      // Fallback: find any high-quality natural en-US voice (male or female)
+      const naturalVoice = voices.find(v => {
         const isEnUS = v.lang.startsWith('en-US');
-        const isFemale = v.name.toLowerCase().includes('female') || 
-                        v.name.toLowerCase().includes('samantha') ||
-                        v.name.toLowerCase().includes('allison') ||
-                        v.name.toLowerCase().includes('aria') ||
-                        v.name.toLowerCase().includes('victoria') ||
-                        v.name.toLowerCase().includes('karen') ||
-                        v.name.toLowerCase().includes('zira') ||
-                        v.name.toLowerCase().includes('susan');
-        return isEnUS && isFemale;
+        const isHighQuality = v.name.toLowerCase().includes('female') || 
+                             v.name.toLowerCase().includes('male') ||
+                             v.name.toLowerCase().includes('samantha') ||
+                             v.name.toLowerCase().includes('allison') ||
+                             v.name.toLowerCase().includes('alex') ||
+                             v.name.toLowerCase().includes('aria') ||
+                             v.name.toLowerCase().includes('david') ||
+                             v.name.toLowerCase().includes('victoria') ||
+                             v.name.toLowerCase().includes('karen') ||
+                             v.name.toLowerCase().includes('zira') ||
+                             v.name.toLowerCase().includes('mark') ||
+                             v.name.toLowerCase().includes('jenny') ||
+                             v.name.toLowerCase().includes('guy') ||
+                             v.name.toLowerCase().includes('daniel') ||
+                             v.name.toLowerCase().includes('tom');
+        return isEnUS && isHighQuality;
       });
       
-      if (femaleVoice) {
-        selectedVoiceRef.current = femaleVoice;
-        console.log('[Voice] Selected female voice:', femaleVoice.name, femaleVoice.lang);
+      if (naturalVoice) {
+        selectedVoiceRef.current = naturalVoice;
+        console.log('[Voice] Selected natural voice:', naturalVoice.name, naturalVoice.lang);
         return;
       }
       
@@ -203,15 +233,22 @@ export function useVoiceInterface(
     };
 
     // Load voices (they might not be available immediately)
+    const voiceChangeHandler = () => {
+      selectVoice();
+    };
+    
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = selectFemaleVoice;
+      window.speechSynthesis.onvoiceschanged = voiceChangeHandler;
     }
     
     // Try to select voice immediately (might work on some browsers)
-    selectFemaleVoice();
+    selectVoice();
     
     // Also try after a short delay (voices might load asynchronously)
-    setTimeout(selectFemaleVoice, 500);
+    setTimeout(selectVoice, 500);
+    
+    // Also try after a longer delay to catch late-loading voices
+    setTimeout(selectVoice, 1500);
 
     return () => {
       if (recognitionRef.current) {
@@ -222,7 +259,7 @@ export function useVoiceInterface(
         }
       }
     };
-  }, [onTranscript, onStatusChange]);
+  }, [onTranscript, onStatusChange, selectedVoiceName]);
 
   const startListening = () => {
     if (!recognitionRef.current) {
@@ -308,26 +345,66 @@ export function useVoiceInterface(
 
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Use the selected female voice if available
-    if (selectedVoiceRef.current) {
+    // Get available voices (always get fresh list)
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Always try to use the selected voice name if provided
+    if (selectedVoiceName) {
+      const voice = voices.find(v => v.name === selectedVoiceName);
+      if (voice && voice.lang.startsWith('en-US')) {
+        utterance.voice = voice;
+        selectedVoiceRef.current = voice;
+        console.log('[Voice] Using user-selected voice:', voice.name, voice.lang);
+      } else {
+        console.log('[Voice] Selected voice not found:', selectedVoiceName, '- trying fallback');
+        // Fallback to selectedVoiceRef if user selection not found
+        if (selectedVoiceRef.current) {
+          utterance.voice = selectedVoiceRef.current;
+          console.log('[Voice] Using cached voice:', selectedVoiceRef.current.name);
+        } else {
+          // Last resort: find any en-US voice
+          const enUSVoice = voices.find(v => v.lang.startsWith('en-US'));
+          if (enUSVoice) {
+            utterance.voice = enUSVoice;
+            selectedVoiceRef.current = enUSVoice;
+            console.log('[Voice] Using fallback voice:', enUSVoice.name);
+          }
+        }
+      }
+    } else if (selectedVoiceRef.current) {
+      // Use the cached voice if no specific selection
       utterance.voice = selectedVoiceRef.current;
-      console.log('[Voice] Using voice:', selectedVoiceRef.current.name);
+      console.log('[Voice] Using cached voice (auto-selected):', selectedVoiceRef.current.name);
     } else {
       // Fallback: try to select voice again
-      const voices = window.speechSynthesis.getVoices();
-      // Look for cute female voices
-      const femaleVoice = voices.find(v => 
+      // Look for high-quality natural voices (male or female)
+      const naturalVoice = voices.find(v => 
         v.lang.startsWith('en-US') && 
         (v.name.toLowerCase().includes('female') || 
+         v.name.toLowerCase().includes('male') ||
          v.name.toLowerCase().includes('samantha') ||
          v.name.toLowerCase().includes('allison') ||
+         v.name.toLowerCase().includes('alex') ||
          v.name.toLowerCase().includes('aria') ||
+         v.name.toLowerCase().includes('david') ||
          v.name.toLowerCase().includes('karen') ||
-         v.name.toLowerCase().includes('victoria'))
+         v.name.toLowerCase().includes('victoria') ||
+         v.name.toLowerCase().includes('mark') ||
+         v.name.toLowerCase().includes('jenny') ||
+         v.name.toLowerCase().includes('guy'))
       );
-      if (femaleVoice) {
-        utterance.voice = femaleVoice;
-        selectedVoiceRef.current = femaleVoice;
+      if (naturalVoice) {
+        utterance.voice = naturalVoice;
+        selectedVoiceRef.current = naturalVoice;
+        console.log('[Voice] Using auto-selected natural voice:', naturalVoice.name);
+      } else {
+        // Last resort: any en-US voice
+        const enUSVoice = voices.find(v => v.lang.startsWith('en-US'));
+        if (enUSVoice) {
+          utterance.voice = enUSVoice;
+          selectedVoiceRef.current = enUSVoice;
+          console.log('[Voice] Using fallback voice:', enUSVoice.name);
+        }
       }
       utterance.lang = 'en-US';
     }
@@ -362,6 +439,31 @@ export function useVoiceInterface(
     synthesisRef.current.speak(utterance);
   };
 
+  // Expose a function to manually update voice selection
+  const updateVoice = () => {
+    const voices = window.speechSynthesis.getVoices();
+    if (selectedVoiceName) {
+      const voice = voices.find(v => v.name === selectedVoiceName);
+      if (voice && voice.lang.startsWith('en-US')) {
+        selectedVoiceRef.current = voice;
+        console.log('[Voice] Manually updated to:', voice.name);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Update voice when selectedVoiceName changes (in addition to useEffect)
+  useEffect(() => {
+    if (selectedVoiceName) {
+      // Try to update voice immediately
+      updateVoice();
+      // Also try after a delay in case voices are still loading
+      const timeout = setTimeout(updateVoice, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [selectedVoiceName]);
+
   return {
     startListening,
     stopListening,
@@ -369,5 +471,6 @@ export function useVoiceInterface(
     isSupported,
     isListening,
     error,
+    updateVoice,
   };
 }

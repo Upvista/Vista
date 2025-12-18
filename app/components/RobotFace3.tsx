@@ -14,7 +14,7 @@ const AUTO_EMOTIONS: Array<'happy' | 'sad' | 'surprised' | 'excited' | 'sleepy' 
   'happy', 'sad', 'surprised', 'excited', 'sleepy', 'confused', 'love', 'wink', 'smiling'
 ];
 
-export default function RobotFace({ emotion, isActive = false, onFaceClick, onLongPress, autoAnimate = false }: RobotFaceProps) {
+export default function RobotFace3({ emotion, isActive = false, onFaceClick, onLongPress, autoAnimate = false }: RobotFaceProps) {
   const leftEyeRef = useRef<HTMLDivElement>(null);
   const rightEyeRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,11 +25,10 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const longPressTriggeredRef = useRef(false);
 
-  // Eye tracking and random looking around - allow during listening/thinking/talking too
+  // Eye tracking and random looking around
   useEffect(() => {
     if (!containerRef.current || !isActive || !autoAnimate) return;
     
-    // Don't do random eye movements during active emotion animations
     if (currentAutoEmotion !== null && 
         emotion !== 'neutral' && 
         emotion !== 'listening' && 
@@ -38,30 +37,26 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
       return;
     }
     
-    // Random eye movement (looking around)
     const lookInterval = setInterval(() => {
-      // Don't interrupt if user is actively tracking mouse/touch
       if (lookDirection !== 'center') return;
       
       const directions: Array<'left' | 'right' | 'center'> = ['left', 'right', 'center'];
       const randomDir = directions[Math.floor(Math.random() * directions.length)];
       setLookDirection(randomDir);
       
-      // Return to center after a moment
       setTimeout(() => {
         setLookDirection('center');
       }, 1500 + Math.random() * 1000);
-    }, 3000 + Math.random() * 3000); // Look around every 3-6 seconds
+    }, 3000 + Math.random() * 3000);
 
     return () => clearInterval(lookInterval);
   }, [emotion, isActive, autoAnimate, currentAutoEmotion, lookDirection]);
 
-  // Mouse/touch tracking - allow during listening/thinking/talking
+  // Mouse/touch tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current || !isActive) return;
       
-      // Allow tracking during neutral, listening, thinking, talking states
       const allowTracking = emotion === 'neutral' || 
                            emotion === 'listening' || 
                            emotion === 'thinking' || 
@@ -86,7 +81,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     const handleTouchMove = (e: TouchEvent) => {
       if (!containerRef.current || !isActive || e.touches.length === 0) return;
       
-      // Allow tracking during neutral, listening, thinking, talking states
       const allowTracking = emotion === 'neutral' || 
                            emotion === 'listening' || 
                            emotion === 'thinking' || 
@@ -125,7 +119,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
         window.removeEventListener('touchmove', handleTouchMove);
       };
     } else {
-      // When looking left/right, override mouse tracking
       if (lookDirection === 'left') {
         setEyePosition({ x: -10, y: 0 });
       } else if (lookDirection === 'right') {
@@ -136,11 +129,10 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     }
   }, [emotion, isActive, lookDirection, currentAutoEmotion]);
 
-  // Auto blinking - should work in all states except during actual emotion animations
+  // Auto blinking
   useEffect(() => {
     if (!isActive || !autoAnimate) return;
     
-    // Don't blink during emotion animations, but allow blinking during listening/thinking/talking
     const shouldSkipBlink = currentAutoEmotion !== null && 
                            emotion !== 'listening' && 
                            emotion !== 'thinking' && 
@@ -156,49 +148,36 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     return () => clearInterval(blinkInterval);
   }, [emotion, isActive, autoAnimate, currentAutoEmotion]);
 
-  // Auto emotion animation - CONTINUOUS, never stops
+  // Auto emotion animation
   useEffect(() => {
     if (!autoAnimate || !isActive) return;
 
     const autoEmotionInterval = setInterval(() => {
-      // Show emotions continuously, even during listening/thinking/talking
-      // But skip if there's already an active auto emotion
       if (currentAutoEmotion) return;
       
-      // Select random emotion
       const randomEmotion = AUTO_EMOTIONS[Math.floor(Math.random() * AUTO_EMOTIONS.length)];
       setCurrentAutoEmotion(randomEmotion);
       
-      // Show emotion for 2-4 seconds (longer for more visible emotions)
       const emotionDuration = 2000 + Math.random() * 2000;
       setTimeout(() => {
         setCurrentAutoEmotion(null);
       }, emotionDuration);
-    }, 3000 + Math.random() * 2000); // Show new emotion every 3-5 seconds (faster, more continuous)
+    }, 3000 + Math.random() * 2000);
 
     return () => clearInterval(autoEmotionInterval);
   }, [emotion, isActive, autoAnimate, currentAutoEmotion]);
 
-  // Get emotion class - auto emotions show continuously, even during listening/thinking/talking
   const getEmotionClass = () => {
     if (!isActive) return '';
     
-    // Show auto emotion if active (these take priority and show continuously)
     if (currentAutoEmotion) {
       return currentAutoEmotion;
     }
     
-    // User emotions (listening/thinking/talking) are shown through CSS classes but auto emotions take visual priority
-    // The listening/thinking/talking states will still show purple glow, etc. via CSS
-    // but auto emotions will animate the eyes continuously
     if (emotion === 'listening' || emotion === 'thinking' || emotion === 'talking') {
-      // Return both - auto emotion for eye animation, and base state for CSS glow
-      // Auto emotion already returned above, so we add the state as a secondary class
-      // This is handled by the CSS - listening state has purple glow
       return '';
     }
     
-    // Show user emotion
     switch (emotion) {
       case 'happy':
         return 'happy';
@@ -225,23 +204,15 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     }
   };
 
-  const getEyeColor = () => {
-    // Very dark brown/almost black - solid, opaque
-    return '#2C2623';
-  };
-
   const shouldShowEyeAnimation = () => {
-    // Show animation for auto emotions or user emotions (except listening/thinking/talking)
     if (currentAutoEmotion) return true;
     if (emotion === 'listening' || emotion === 'thinking' || emotion === 'talking') return false;
     return emotion !== 'neutral';
   };
 
-  // Calculate eye transform based on look direction or mouse position
   const getEyeTransform = () => {
     if (!isActive) return undefined;
     
-    // Don't apply transform during emotion animations (except listening/thinking/talking)
     if (currentAutoEmotion && 
         emotion !== 'listening' && 
         emotion !== 'thinking' && 
@@ -249,7 +220,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
       return undefined;
     }
     
-    // Allow eye movement during neutral, listening, thinking, talking
     const allowMovement = emotion === 'neutral' || 
                          emotion === 'listening' || 
                          emotion === 'thinking' || 
@@ -268,11 +238,9 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     return `translate(${eyePosition.x}px, ${eyePosition.y}px)`;
   };
 
-  // Get pupil position for anime eyes - reflections move slightly for eye tracking
-  const getPupilTransform = () => {
+  const getReflectionTransform = () => {
     if (!isActive) return undefined;
     
-    // Don't apply transform during emotion animations (except listening/thinking/talking)
     if (currentAutoEmotion && 
         emotion !== 'listening' && 
         emotion !== 'thinking' && 
@@ -280,7 +248,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
       return undefined;
     }
     
-    // Allow eye movement during neutral, listening, thinking, talking
     const allowMovement = emotion === 'neutral' || 
                          emotion === 'listening' || 
                          emotion === 'thinking' || 
@@ -288,7 +255,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     
     if (!allowMovement) return undefined;
     
-    // Reflections move slightly for natural eye tracking effect
     const reflectionMoveX = eyePosition.x * 0.3;
     const reflectionMoveY = eyePosition.y * 0.3;
     const maxReflectionMove = 6;
@@ -304,7 +270,6 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
     return `translate(${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveX))}px, ${Math.max(-maxReflectionMove, Math.min(maxReflectionMove, reflectionMoveY))}px)`;
   };
 
-  // Get mouth shape based on emotion
   const getMouthShape = () => {
     if (emotion === 'talking') return 'talking';
     if (currentAutoEmotion === 'happy' || emotion === 'happy' || currentAutoEmotion === 'excited' || emotion === 'excited' || currentAutoEmotion === 'smiling' || emotion === 'smiling') return 'happy';
@@ -326,7 +291,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
         longPressTriggeredRef.current = true;
         onLongPress();
       }
-    }, 500); // 500ms for long press
+    }, 500);
   };
 
   const handleMouseUp = () => {
@@ -366,7 +331,7 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
   return (
     <div className="robot-container">
       <div 
-        className={`robot-face anime-style ${getEmotionClass()} ${emotion === 'listening' ? 'listening' : ''} ${emotion === 'thinking' ? 'thinking' : ''} ${emotion === 'talking' ? 'talking' : ''}`}
+        className={`robot-face face-3 anime-style ${getEmotionClass()} ${emotion === 'listening' ? 'listening' : ''} ${emotion === 'thinking' ? 'thinking' : ''} ${emotion === 'talking' ? 'talking' : ''}`}
         ref={containerRef}
         onClick={onFaceClick}
         onMouseDown={handleMouseDown}
@@ -376,69 +341,21 @@ export default function RobotFace({ emotion, isActive = false, onFaceClick, onLo
         onTouchEnd={handleTouchEnd}
         style={{ cursor: onFaceClick ? 'pointer' : 'default' }}
       >
-        <div className="eyes-container">
+        <div className="eyes-container face-3-eyes">
           <div 
-            className={`anime-eye ${emotion === 'wink' || currentAutoEmotion === 'wink' ? 'wink' : ''} ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
+            className={`face-3-eye-square ${emotion === 'wink' || currentAutoEmotion === 'wink' ? 'wink' : ''} ${isBlinking ? 'blinking' : ''}`}
             ref={leftEyeRef}
             style={{
               transform: getEyeTransform(),
             }}
-          >
-            <div className="simple-eye">
-              <div className="eye-main"></div>
-              <div className="eye-reflection-primary"></div>
-              <div className="eye-reflection-secondary"></div>
-              <div className="eye-blush"></div>
-            </div>
-          </div>
+          ></div>
           <div 
-            className={`anime-eye ${isBlinking ? 'blinking' : ''} ${shouldShowEyeAnimation() ? getEmotionClass() : ''}`}
+            className={`face-3-eye-square ${isBlinking ? 'blinking' : ''}`}
             ref={rightEyeRef}
             style={{
               transform: getEyeTransform(),
             }}
-          >
-            <div className="simple-eye">
-              <div className="eye-main"></div>
-              <div className="eye-reflection-primary"></div>
-              <div className="eye-reflection-secondary"></div>
-              <div className="eye-blush"></div>
-            </div>
-          </div>
-        </div>
-        <div className={`anime-mouth ${getMouthShape()}`}>
-          <svg viewBox="0 0 100 60" className="mouth-svg">
-            {getMouthShape() === 'happy' && (
-              <path d="M 25 30 Q 35 38, 45 30 Q 55 38, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'sad' && (
-              <path d="M 25 35 Q 35 27, 45 35 Q 55 27, 65 35" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'surprised' && (
-              <ellipse cx="45" cy="30" rx="6" ry="10" stroke="currentColor" strokeWidth="3" fill="currentColor" opacity="0.2"/>
-            )}
-            {getMouthShape() === 'angry' && (
-              <path d="M 25 33 Q 35 28, 45 33 Q 55 28, 65 33" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'love' && (
-              <path d="M 25 30 Q 35 25, 45 30 Q 55 25, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'confused' && (
-              <path d="M 30 30 Q 40 33, 50 30 Q 60 33, 70 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'sleepy' && (
-              <path d="M 28 33 Q 40 35, 52 33 Q 60 35, 68 33" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-            )}
-            {getMouthShape() === 'talking' && (
-              <>
-                <ellipse cx="45" cy="30" rx="7" ry="9" stroke="currentColor" strokeWidth="3" fill="currentColor" opacity="0.25" className="talking-mouth-1"/>
-                <ellipse cx="45" cy="30" rx="4" ry="6" stroke="currentColor" strokeWidth="2.5" fill="currentColor" opacity="0.4" className="talking-mouth-2"/>
-              </>
-            )}
-            {getMouthShape() === 'neutral' && (
-              <path d="M 25 30 Q 35 33, 45 30 Q 55 33, 65 30" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>
-            )}
-          </svg>
+          ></div>
         </div>
       </div>
     </div>
